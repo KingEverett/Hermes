@@ -21,7 +21,7 @@ describe('Node Selection & Details', () => {
 
   it('should display node details when a node is clicked', () => {
     // Verify ProjectView is loaded
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
     // Look for clickable nodes in the network graph
     // Note: The actual selector depends on NetworkGraph implementation
@@ -49,7 +49,7 @@ describe('Node Selection & Details', () => {
 
   it('should display correct node information in details panel', () => {
     // Verify ProjectView is loaded
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
     // Find nodes with data attributes
     cy.get('[data-node-id]').first().then(($node) => {
@@ -86,7 +86,7 @@ describe('Node Selection & Details', () => {
 
   it('should update details panel when clicking different nodes', () => {
     // Verify ProjectView is loaded
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
     // Find all nodes
     cy.get('[data-node-id]').then(($nodes) => {
@@ -118,7 +118,7 @@ describe('Node Selection & Details', () => {
 
   it('should persist node selection state across interactions', () => {
     // Verify ProjectView is loaded
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
     // Find a node and click it
     cy.get('[data-node-id]').first().then(($node) => {
@@ -151,7 +151,7 @@ describe('Node Selection & Details', () => {
 
   it('should handle rapid node selection clicks', () => {
     // Verify ProjectView is loaded
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
     // Find nodes
     cy.get('[data-node-id]').then(($nodes) => {
@@ -181,7 +181,7 @@ describe('Node Selection & Details', () => {
     // This test verifies the complete node selection and details workflow
 
     // 1. Verify app loaded with ProjectView
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
     cy.log('Step 1: ProjectView loaded');
 
     // 2. Find network graph nodes

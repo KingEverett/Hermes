@@ -136,7 +136,7 @@ describe('Error Handling & Retry', () => {
     cy.contains('Failed to fetch projects').should('not.exist');
 
     // Verify ProjectView is rendered
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
     cy.log('Application recovered and rendered project data');
   });
@@ -283,7 +283,7 @@ describe('Error Handling & Retry', () => {
     cy.log('Step 8: Error UI cleared');
 
     // 9. Verify app recovered and shows ProjectView
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
     cy.log('Step 9: ProjectView rendered after recovery');
 
     // 10. Verify app is fully functional

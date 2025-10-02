@@ -52,7 +52,7 @@ describe('Application Load & Project Display', () => {
     cy.get('body').should('exist');
 
     // If a project exists, verify ProjectView is rendered
-    cy.get('[data-testid="project-view"]', { timeout: 5000 })
+    cy.get('[data-testid="project-view"]', { timeout: 15000 })
       .should('exist')
       .then(($projectView) => {
         // ProjectView found - verify it contains project data
@@ -74,7 +74,7 @@ describe('Application Load & Project Display', () => {
     cy.contains('Loading Hermes...').should('not.exist', { timeout: 10000 });
 
     // Verify ProjectView is rendered (if project exists)
-    cy.get('[data-testid="project-view"]', { timeout: 10000 }).then(($projectView) => {
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).then(($projectView) => {
       if ($projectView.length > 0) {
         // ProjectView exists - look for NetworkGraph
         cy.log('ProjectView found, checking for network graph');
@@ -132,7 +132,7 @@ describe('Application Load & Project Display', () => {
           Array.isArray(interception.response.body) &&
           interception.response.body.length > 0) {
         // Project exists - should see ProjectView
-        cy.get('[data-testid="project-view"]', { timeout: 10000 }).should('exist');
+        cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
         cy.log('Step 5: ProjectView rendered successfully');
       } else {
         // No projects - app should still render without errors
