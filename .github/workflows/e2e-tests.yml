@@ -62,7 +62,7 @@ jobs:
 
       - name: Build frontend
         working-directory: ./frontend/web-app
-        run: DISABLE_ESLINT_PLUGIN=true npm run build
+        run: DISABLE_ESLINT_PLUGIN=true REACT_APP_API_URL=http://localhost:8000 npm run build
 
       - name: Start frontend server
         working-directory: ./frontend/web-app

@@ -5,6 +5,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { createApiUrl } from '../config/api';
 
 interface Project {
   id: string;
@@ -14,7 +15,7 @@ interface Project {
 }
 
 const fetchProjects = async (): Promise<Project[]> => {
-  const response = await fetch('/api/v1/projects/');
+  const response = await fetch(createApiUrl('api/v1/projects/'));
 
   if (!response.ok) {
     throw new Error(`Failed to fetch projects: ${response.statusText}`);
