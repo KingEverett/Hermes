@@ -15,7 +15,7 @@ from api.staleness import router as staleness_router
 from api.quality import router as quality_router
 from api.topology import router as topology_router
 from api.attack_chains import router as attack_chains_router
-from database.connection import get_session as get_db_session
+from database.connection import get_db
 import redis.asyncio as redis
 import os
 import logging
@@ -46,7 +46,7 @@ async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
 
 @app.get("/api/v1/status")
-async def get_status(db: Session = Depends(get_db_session)):
+async def get_status(db: Session = Depends(get_db)):
     """
     Get comprehensive system status (CLI-friendly endpoint)
     """
