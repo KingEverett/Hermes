@@ -13,7 +13,7 @@
 // Custom command to wait for API requests to complete
 Cypress.Commands.add('waitForApiReady', () => {
   cy.request({
-    url: `${Cypress.env('apiUrl')}/api/v1/projects/`,
+    url: '/api/v1/projects/',
     failOnStatusCode: false,
   }).then((response) => {
     expect(response.status).to.be.oneOf([200, 404]);

@@ -14,20 +14,56 @@ describe('Node Selection & Details', () => {
 
     // Mock the projects API to return test data
     cy.fixture('test-project').then((project) => {
-      cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, [project]).as('getProjects');
+      cy.intercept('GET', '/api/v1/projects/', [project]).as('getProjects');
     });
 
     // Mock the topology API to return test topology data
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology`, {
+    cy.intercept('GET', '/api/v1/projects/*/topology', {
       nodes: [
-        { id: 'host_1', type: 'host', label: 'Web Server 1', group: 'hosts', x: 100, y: 100 },
-        { id: 'host_2', type: 'host', label: 'Database Server', group: 'hosts', x: 200, y: 150 },
-        { id: 'service_1', type: 'service', label: 'HTTP (80)', group: 'services', x: 150, y: 200 }
+        {
+          id: 'host_1',
+          type: 'host',
+          label: 'Web Server 1',
+          x: 100,
+          y: 100,
+          metadata: {
+            hostname: 'web-server-1',
+            status: 'active'
+          }
+        },
+        {
+          id: 'host_2',
+          type: 'host',
+          label: 'Database Server',
+          x: 200,
+          y: 150,
+          metadata: {
+            hostname: 'db-server-1',
+            status: 'active'
+          }
+        },
+        {
+          id: 'service_1',
+          type: 'service',
+          label: 'HTTP (80)',
+          x: 150,
+          y: 200,
+          metadata: {
+            service_name: 'HTTP',
+            product: 'Apache',
+            version: '2.4'
+          }
+        }
       ],
       edges: [
-        { source: 'host_1', target: 'service_1', type: 'hosts' },
-        { source: 'host_2', target: 'service_1', type: 'connects' }
-      ]
+        { source: 'host_1', target: 'service_1' },
+        { source: 'host_2', target: 'service_1' }
+      ],
+      metadata: {
+        node_count: 3,
+        edge_count: 2,
+        generated_at: '2025-10-02T00:00:00Z'
+      }
     }).as('getTopology');
 
     // Visit the application and wait for it to load

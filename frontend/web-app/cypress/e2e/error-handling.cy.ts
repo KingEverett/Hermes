@@ -10,7 +10,7 @@
 describe('Error Handling & Retry', () => {
   it('should display error UI when backend is unavailable', () => {
     // Simulate backend failure by intercepting and failing the API call
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, {
+    cy.intercept('GET', '/api/v1/projects/', {
       statusCode: 500,
       body: { error: 'Internal Server Error' },
     }).as('getProjectsError');
@@ -29,7 +29,7 @@ describe('Error Handling & Retry', () => {
 
   it('should display retry button when error occurs', () => {
     // Simulate backend failure
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, {
+    cy.intercept('GET', '/api/v1/projects/', {
       statusCode: 500,
       body: { error: 'Internal Server Error' },
     }).as('getProjectsError');
@@ -50,7 +50,7 @@ describe('Error Handling & Retry', () => {
     let requestCount = 0;
 
     // First request fails, second succeeds
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, (req) => {
+    cy.intercept('GET', '/api/v1/projects/', (req) => {
       requestCount++;
       if (requestCount === 1) {
         // First request: simulate failure
@@ -102,7 +102,7 @@ describe('Error Handling & Retry', () => {
     let requestCount = 0;
 
     // First request fails, second succeeds with project data
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, (req) => {
+    cy.intercept('GET', '/api/v1/projects/', (req) => {
       requestCount++;
       if (requestCount === 1) {
         req.reply({
@@ -143,7 +143,7 @@ describe('Error Handling & Retry', () => {
 
   it('should handle network timeout errors', () => {
     // Simulate network timeout
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, (req) => {
+    cy.intercept('GET', '/api/v1/projects/', (req) => {
       req.reply({
         statusCode: 504,
         body: { error: 'Gateway Timeout' },
@@ -167,7 +167,7 @@ describe('Error Handling & Retry', () => {
 
   it('should handle connection refused errors', () => {
     // Simulate connection refused (network error)
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, {
+    cy.intercept('GET', '/api/v1/projects/', {
       forceNetworkError: true,
     }).as('getProjectsNetworkError');
 
@@ -188,7 +188,7 @@ describe('Error Handling & Retry', () => {
     let requestCount = 0;
 
     // First two requests fail, third succeeds
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, (req) => {
+    cy.intercept('GET', '/api/v1/projects/', (req) => {
       requestCount++;
       if (requestCount <= 2) {
         req.reply({
@@ -235,7 +235,7 @@ describe('Error Handling & Retry', () => {
 
     let requestCount = 0;
 
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, (req) => {
+    cy.intercept('GET', '/api/v1/projects/', (req) => {
       requestCount++;
       if (requestCount === 1) {
         req.reply({

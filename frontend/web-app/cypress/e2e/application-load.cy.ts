@@ -23,7 +23,7 @@ describe('Application Load & Project Display', () => {
 
   it('should fetch default project from backend API', () => {
     // Intercept the API call to verify it's made
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`).as('getProjects');
+    cy.intercept('GET', '/api/v1/projects/').as('getProjects');
 
     // Visit the application
     cy.visit('/');
@@ -43,15 +43,30 @@ describe('Application Load & Project Display', () => {
   it('should render network graph with topology data when project loads', () => {
     // Mock the projects API to return test data
     cy.fixture('test-project').then((project) => {
-      cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, [project]).as('getProjects');
+      cy.intercept('GET', '/api/v1/projects/', [project]).as('getProjects');
     });
 
     // Mock the topology API to return test topology data
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology`, {
+    cy.intercept('GET', '/api/v1/projects/*/topology', {
       nodes: [
-        { id: 'host_1', type: 'host', label: 'Web Server 1', group: 'hosts', x: 100, y: 100 }
+        {
+          id: 'host_1',
+          type: 'host',
+          label: 'Web Server 1',
+          x: 100,
+          y: 100,
+          metadata: {
+            hostname: 'web-server-1',
+            status: 'active'
+          }
+        }
       ],
-      edges: []
+      edges: [],
+      metadata: {
+        node_count: 1,
+        edge_count: 0,
+        generated_at: '2025-10-02T00:00:00Z'
+      }
     }).as('getTopology');
 
     // Visit the application
@@ -71,18 +86,43 @@ describe('Application Load & Project Display', () => {
   it('should display network graph with nodes when project has topology data', () => {
     // Mock the projects API to return test data
     cy.fixture('test-project').then((project) => {
-      cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, [project]).as('getProjects');
+      cy.intercept('GET', '/api/v1/projects/', [project]).as('getProjects');
     });
 
     // Mock the topology API with nodes
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology`, {
+    cy.intercept('GET', '/api/v1/projects/*/topology', {
       nodes: [
-        { id: 'host_1', type: 'host', label: 'Web Server 1', group: 'hosts', x: 100, y: 100 },
-        { id: 'host_2', type: 'host', label: 'Database Server', group: 'hosts', x: 200, y: 150 }
+        {
+          id: 'host_1',
+          type: 'host',
+          label: 'Web Server 1',
+          x: 100,
+          y: 100,
+          metadata: {
+            hostname: 'web-server-1',
+            status: 'active'
+          }
+        },
+        {
+          id: 'host_2',
+          type: 'host',
+          label: 'Database Server',
+          x: 200,
+          y: 150,
+          metadata: {
+            hostname: 'db-server-1',
+            status: 'active'
+          }
+        }
       ],
       edges: [
-        { source: 'host_1', target: 'host_2', type: 'connects' }
-      ]
+        { source: 'host_1', target: 'host_2' }
+      ],
+      metadata: {
+        node_count: 2,
+        edge_count: 1,
+        generated_at: '2025-10-02T00:00:00Z'
+      }
     }).as('getTopology');
 
     // Visit the application
@@ -106,7 +146,7 @@ describe('Application Load & Project Display', () => {
 
   it('should handle empty project state gracefully', () => {
     // Intercept projects API and return empty array
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, {
+    cy.intercept('GET', '/api/v1/projects/', {
       statusCode: 200,
       body: [],
     }).as('getProjects');
@@ -126,7 +166,7 @@ describe('Application Load & Project Display', () => {
 
   it('should complete full application load workflow end-to-end', () => {
     // This test verifies the complete happy path workflow
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`).as('getProjects');
+    cy.intercept('GET', '/api/v1/projects/').as('getProjects');
 
     // 1. Visit application
     cy.visit('/');
