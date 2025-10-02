@@ -34,6 +34,11 @@ export function AppContent() {
 
   // Error state
   if (error) {
+    console.log('🔍 App Error Debug:', {
+      errorMessage: error.message,
+      errorType: error.constructor.name,
+      fullError: error
+    });
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center max-w-md">

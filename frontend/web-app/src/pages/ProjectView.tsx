@@ -4,7 +4,7 @@
  * Main project visualization page displaying network topology graph.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NetworkGraph } from '../components/visualization/NetworkGraph';
 import { useNetworkData } from '../hooks/useNetworkData';
 import { ThreePanelLayout } from '../components/layout/ThreePanelLayout';
@@ -19,6 +19,18 @@ interface ProjectViewProps {
 export const ProjectView: React.FC<ProjectViewProps> = ({ projectId }) => {
   const { data, isLoading, error } = useNetworkData(projectId);
   const [selectedNode, setSelectedNode] = useState<NetworkNode | null>(null);
+
+  // Debug logging for E2E tests
+  useEffect(() => {
+    console.log('🔍 ProjectView Debug:', {
+      projectId,
+      hasData: !!data,
+      dataNodeCount: data?.nodes?.length || 0,
+      isLoading,
+      error: error?.message,
+      testIdElement: document.querySelector('[data-testid="project-view"]')
+    });
+  }, [projectId, data, isLoading, error]);
 
   // Adapter to convert NetworkGraph's nodeIds array to NetworkNode for RightPanel
   const handleNodeSelect = (nodeIds: string[]) => {
