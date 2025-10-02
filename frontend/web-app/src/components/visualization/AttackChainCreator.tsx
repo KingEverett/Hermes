@@ -118,9 +118,13 @@ const AttackChainCreator: React.FC<AttackChainCreatorProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+      <div
+        role="dialog"
+        aria-labelledby="modal-title"
+        className="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+      >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-100">
+          <h2 id="modal-title" className="text-xl font-bold text-gray-100">
             Create Attack Chain {step > 1 && `- Step ${step}/3`}
           </h2>
           <button
@@ -135,10 +139,11 @@ const AttackChainCreator: React.FC<AttackChainCreatorProps> = ({
         {step === 1 && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="chain-name" className="block text-sm font-medium text-gray-300 mb-1">
                 Chain Name *
               </label>
               <input
+                id="chain-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -148,10 +153,11 @@ const AttackChainCreator: React.FC<AttackChainCreatorProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="chain-description" className="block text-sm font-medium text-gray-300 mb-1">
                 Description
               </label>
               <textarea
+                id="chain-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -161,11 +167,12 @@ const AttackChainCreator: React.FC<AttackChainCreatorProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="chain-color" className="block text-sm font-medium text-gray-300 mb-1">
                 Color
               </label>
               <div className="flex items-center space-x-2">
                 <input
+                  id="chain-color"
                   type="color"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}

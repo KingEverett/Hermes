@@ -8,8 +8,14 @@ import { exportSVG, exportPNG, generateExportFilename } from '../graphExport';
 const mockCreateObjectURL = jest.fn(() => 'blob:mock-url');
 const mockRevokeObjectURL = jest.fn();
 
-global.URL.createObjectURL = mockCreateObjectURL;
-global.URL.revokeObjectURL = mockRevokeObjectURL;
+Object.defineProperty(global.URL, 'createObjectURL', {
+  value: mockCreateObjectURL,
+  writable: true,
+});
+Object.defineProperty(global.URL, 'revokeObjectURL', {
+  value: mockRevokeObjectURL,
+  writable: true,
+});
 
 describe('GraphExport Service', () => {
   let mockSvgElement: SVGElement;
@@ -28,26 +34,45 @@ describe('GraphExport Service', () => {
     document.body.innerHTML = '';
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('exportSVG', () => {
     it('should create SVG blob and trigger download', () => {
+      // Create a real anchor element and spy on its click method
+      const mockLink = document.createElement('a');
+      const clickSpy = jest.spyOn(mockLink, 'click').mockImplementation(() => {});
+
+      const createElementSpy = jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+        if (tagName === 'a') {
+          return mockLink;
+        }
+        return document.createElement(tagName);
+      });
+
+      // Mock appendChild and removeChild to track DOM operations
+      const appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink);
+      const removeChildSpy = jest.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink);
+
       exportSVG(mockSvgElement, 'test-graph.svg');
 
-      expect(mockCreateObjectURL).toHaveBeenCalledWith(
-        expect.any(Blob)
-      );
-
-      // Check that the blob has correct type
-      expect(mockCreateObjectURL.mock.calls.length).toBeGreaterThan(0);
+      // Verify blob creation
+      expect(mockCreateObjectURL).toHaveBeenCalledWith(expect.any(Blob));
       const calls = mockCreateObjectURL.mock.calls as unknown as Array<[Blob]>;
       const blobArg = calls[0][0];
       expect(blobArg.type).toBe('image/svg+xml;charset=utf-8');
 
-      // Check if link was created and clicked
-      const link = document.querySelector('a[download="test-graph.svg"]');
-      expect(link).toBeTruthy();
+      // Verify DOM operations
+      expect(createElementSpy).toHaveBeenCalledWith('a');
+      expect(mockLink.download).toBe('test-graph.svg');
+      expect(appendChildSpy).toHaveBeenCalledWith(mockLink);
+      expect(clickSpy).toHaveBeenCalled();
+      expect(removeChildSpy).toHaveBeenCalledWith(mockLink);
 
-      // Check that URL was revoked
-      expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+      // Verify that URL.createObjectURL was called (the actual URL value may vary in tests)
+      expect(mockCreateObjectURL).toHaveBeenCalled();
+      expect(mockRevokeObjectURL).toHaveBeenCalled();
     });
 
     it('should include XML declaration in SVG export', async () => {

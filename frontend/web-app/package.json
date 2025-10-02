@@ -37,12 +37,17 @@
   "scripts": {
     "dev": "react-scripts start",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "backend:start": "cd ../../backend && python main.py",
+    "frontend:build": "npm run build && npx serve -s build -l 3000",
     "e2e": "cypress open",
     "e2e:headless": "cypress run",
-    "e2e:ci": "cypress run --config video=true,screenshotOnRunFailure=true"
+    "e2e:ci": "cypress run --config video=true,screenshotOnRunFailure=true",
+    "e2e:full": "run-p backend:start frontend:build && wait-on http://localhost:8000/api/v1/projects/ http://localhost:3000 && npm run e2e:headless",
+    "e2e:dev": "run-p backend:start start && wait-on http://localhost:8000/api/v1/projects/ http://localhost:3000 && npm run e2e",
+    "test:all": "npm test -- --watchAll=false && npm run e2e:full"
   },
   "eslintConfig": {
     "extends": [

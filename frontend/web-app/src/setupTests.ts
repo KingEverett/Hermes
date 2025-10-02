@@ -83,3 +83,64 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn(),
   })),
 });
+
+// Mock URL.createObjectURL and URL.revokeObjectURL for blob downloads
+global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+global.URL.revokeObjectURL = jest.fn();
+
+// Mock HTMLCanvasElement methods
+Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+  value: jest.fn(() => ({
+    drawImage: jest.fn(),
+    getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(4) })),
+    putImageData: jest.fn(),
+    measureText: jest.fn(() => ({ width: 100 })),
+    fillText: jest.fn(),
+    strokeText: jest.fn(),
+    clearRect: jest.fn(),
+    fillRect: jest.fn(),
+    strokeRect: jest.fn(),
+    beginPath: jest.fn(),
+    moveTo: jest.fn(),
+    lineTo: jest.fn(),
+    arc: jest.fn(),
+    stroke: jest.fn(),
+    fill: jest.fn(),
+    save: jest.fn(),
+    restore: jest.fn(),
+    translate: jest.fn(),
+    rotate: jest.fn(),
+    scale: jest.fn(),
+  })),
+});
+
+// Mock HTMLCanvasElement toBlob method
+Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+  value: jest.fn((callback) => {
+    const mockBlob = new Blob(['fake-image-data'], { type: 'image/png' });
+    callback(mockBlob);
+  }),
+});
+
+// Mock Image constructor for canvas operations
+global.Image = class {
+  onload: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  src: string = '';
+
+  constructor() {
+    // Simulate immediate load
+    setTimeout(() => {
+      if (this.onload) this.onload();
+    }, 0);
+  }
+} as any;
+
+// Note: Individual tests will mock document.createElement as needed
+
+// Mock Blob.text() method for modern blob API
+if (typeof Blob !== 'undefined') {
+  Object.defineProperty(Blob.prototype, 'text', {
+    value: jest.fn().mockResolvedValue('mock-blob-text'),
+  });
+}
