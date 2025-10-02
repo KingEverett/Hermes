@@ -18,7 +18,7 @@ describe('Node Selection & Details', () => {
     });
 
     // Mock the topology API to return test topology data
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology/`, {
+    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology`, {
       nodes: [
         { id: 'host_1', type: 'host', label: 'Web Server 1', group: 'hosts', x: 100, y: 100 },
         { id: 'host_2', type: 'host', label: 'Database Server', group: 'hosts', x: 200, y: 150 },
