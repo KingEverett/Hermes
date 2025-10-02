@@ -47,40 +47,32 @@ describe('Error Handling & Retry', () => {
   });
 
   it('should successfully reconnect when retry button is clicked', () => {
-    let requestCount = 0;
-
-    // First request fails, second succeeds
-    cy.intercept('GET', '/api/v1/projects/', (req) => {
-      requestCount++;
-      if (requestCount === 1) {
-        // First request: simulate failure
-        req.reply({
-          statusCode: 500,
-          body: { error: 'Internal Server Error' },
-        });
-      } else {
-        // Second request: succeed with empty array or mock data
-        req.reply({
-          statusCode: 200,
-          body: [],
-        });
-      }
-    }).as('getProjects');
+    // First intercept - fail the initial request
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 500,
+      body: { error: 'Internal Server Error' },
+    }).as('getProjectsFirst');
 
     // Visit the application
     cy.visit('/');
 
     // Wait for first failed request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsFirst');
 
     // Verify error state
     cy.contains('Cannot connect to backend', { timeout: 10000 }).should('be.visible');
+
+    // Setup second intercept - succeed on retry
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 200,
+      body: [],
+    }).as('getProjectsRetry');
 
     // Click retry button
     cy.contains('button', /retry/i).click();
 
     // Wait for second (successful) request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsRetry');
 
     // Verify error message is gone
     cy.contains('Cannot connect to backend').should('not.exist');
@@ -99,38 +91,43 @@ describe('Error Handling & Retry', () => {
       created_at: '2025-10-01T00:00:00Z',
     };
 
-    let requestCount = 0;
-
-    // First request fails, second succeeds with project data
-    cy.intercept('GET', '/api/v1/projects/', (req) => {
-      requestCount++;
-      if (requestCount === 1) {
-        req.reply({
-          statusCode: 500,
-          body: { error: 'Internal Server Error' },
-        });
-      } else {
-        req.reply({
-          statusCode: 200,
-          body: [mockProject],
-        });
-      }
-    }).as('getProjects');
+    // First intercept - fail the initial request
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 500,
+      body: { error: 'Internal Server Error' },
+    }).as('getProjectsFirst');
 
     // Visit the application
     cy.visit('/');
 
     // Wait for first failed request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsFirst');
 
     // Verify error state
     cy.contains('Cannot connect to backend').should('be.visible');
+
+    // Setup second intercept - succeed with project data on retry
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 200,
+      body: [mockProject],
+    }).as('getProjectsRetry');
+
+    // Mock topology for the project
+    cy.intercept('GET', '/api/v1/projects/*/topology', {
+      nodes: [],
+      edges: [],
+      metadata: {
+        node_count: 0,
+        edge_count: 0,
+        generated_at: '2025-10-02T00:00:00Z'
+      }
+    }).as('getTopology');
 
     // Click retry button
     cy.contains('button', /retry/i).click();
 
     // Wait for successful request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsRetry');
 
     // Verify error is gone
     cy.contains('Cannot connect to backend').should('not.exist');
@@ -185,39 +182,39 @@ describe('Error Handling & Retry', () => {
   });
 
   it('should allow multiple retry attempts', () => {
-    let requestCount = 0;
-
-    // First two requests fail, third succeeds
-    cy.intercept('GET', '/api/v1/projects/', (req) => {
-      requestCount++;
-      if (requestCount <= 2) {
-        req.reply({
-          statusCode: 500,
-          body: { error: 'Internal Server Error' },
-        });
-      } else {
-        req.reply({
-          statusCode: 200,
-          body: [],
-        });
-      }
-    }).as('getProjects');
+    // First intercept - fail the initial request
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 500,
+      body: { error: 'Internal Server Error' },
+    }).as('getProjectsFirst');
 
     // Visit the application
     cy.visit('/');
 
     // Wait for first failed request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsFirst');
     cy.contains('Cannot connect to backend').should('be.visible');
+
+    // Setup second intercept - fail the first retry
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 500,
+      body: { error: 'Internal Server Error' },
+    }).as('getProjectsSecond');
 
     // First retry - still fails
     cy.contains('button', /retry/i).click();
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsSecond');
     cy.contains('Cannot connect to backend').should('be.visible');
+
+    // Setup third intercept - succeed on second retry
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 200,
+      body: [],
+    }).as('getProjectsThird');
 
     // Second retry - succeeds
     cy.contains('button', /retry/i).click();
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsThird');
 
     // Error should be gone
     cy.contains('Cannot connect to backend').should('not.exist');
@@ -233,29 +230,18 @@ describe('Error Handling & Retry', () => {
       created_at: '2025-10-01T00:00:00Z',
     };
 
-    let requestCount = 0;
-
-    cy.intercept('GET', '/api/v1/projects/', (req) => {
-      requestCount++;
-      if (requestCount === 1) {
-        req.reply({
-          statusCode: 500,
-          body: { error: 'Backend Unavailable' },
-        });
-      } else {
-        req.reply({
-          statusCode: 200,
-          body: [mockProject],
-        });
-      }
-    }).as('getProjects');
+    // First intercept - fail the initial request
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 500,
+      body: { error: 'Backend Unavailable' },
+    }).as('getProjectsFirst');
 
     // 1. Visit application
     cy.visit('/');
     cy.log('Step 1: Application visited');
 
     // 2. Wait for initial failed request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsFirst');
     cy.log('Step 2: Initial request failed');
 
     // 3. Verify error UI displays
@@ -270,12 +256,29 @@ describe('Error Handling & Retry', () => {
     cy.contains('button', /retry/i).should('be.visible').and('not.be.disabled');
     cy.log('Step 5: Retry button is available');
 
+    // Setup second intercept - succeed with project data on retry
+    cy.intercept('GET', '/api/v1/projects/', {
+      statusCode: 200,
+      body: [mockProject],
+    }).as('getProjectsRetry');
+
+    // Mock topology for the project
+    cy.intercept('GET', '/api/v1/projects/*/topology', {
+      nodes: [],
+      edges: [],
+      metadata: {
+        node_count: 0,
+        edge_count: 0,
+        generated_at: '2025-10-02T00:00:00Z'
+      }
+    }).as('getTopology');
+
     // 6. Click retry button
     cy.contains('button', /retry/i).click();
     cy.log('Step 6: Retry button clicked');
 
     // 7. Wait for successful retry request
-    cy.wait('@getProjects');
+    cy.wait('@getProjectsRetry');
     cy.log('Step 7: Retry request succeeded');
 
     // 8. Verify error UI is gone
