@@ -1,0 +1,164 @@
+# {{ project.name }} - Penetration Test Report
+
+Generated: {{ timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+
+## Executive Summary
+
+- **Total Hosts**: {{ stats.host_count }}
+- **Total Services**: {{ stats.service_count }}
+- **Open Ports**: {{ stats.open_port_count }}
+- **Scan Status**: Complete
+{%- if stats.vulnerability_count %}
+- **Vulnerabilities Found**: {{ stats.vulnerability_count }}
+{%- if stats.critical_count > 0 %}
+- **Critical Issues**: {{ stats.critical_count }}
+{%- endif %}
+{%- endif %}
+
+## Project Overview
+
+{% if project.description %}
+{{ project.description }}
+{% endif %}
+
+- **Created**: {{ project.created_at.strftime('%Y-%m-%d %H:%M:%S') if project.created_at else 'N/A' }}
+- **Last Updated**: {{ project.updated_at.strftime('%Y-%m-%d %H:%M:%S') if project.updated_at else 'N/A' }}
+
+## Methodology
+
+### Scan Tools Used
+{% for scan in scans %}
+- **{{ scan.tool_type }}** - {{ scan.filename }} (Processed: {{ scan.parsed_at.strftime('%Y-%m-%d %H:%M:%S') if scan.parsed_at else 'N/A' }})
+{%- endfor %}
+
+## Network Discovery Results
+
+### Host Summary
+
+| IP Address | Hostname | Operating System | Status | Services |
+|------------|----------|------------------|--------|----------|
+{%- for host in hosts %}
+| {{ host.ip_address }} | {{ host.hostname or 'N/A' }} | {{ host.os_family or 'Unknown' }} {{ host.os_details or '' }} | {{ host.status }} | {{ host.services|length }} |
+{%- endfor %}
+
+{% if attack_chains %}
+## Attack Chains
+
+This section documents identified exploitation paths through the network, showing how an attacker could chain vulnerabilities and access to move laterally and escalate privileges.
+
+{% if chain_stats %}
+**Attack Chain Summary**:
+- Total Chains: {{ chain_stats.total_chains }}
+- Total Nodes: {{ chain_stats.total_nodes }}
+- Branch Points: {{ chain_stats.total_branches }}
+- Average Nodes per Chain: {{ chain_stats.avg_nodes_per_chain }}
+
+{% endif %}
+{% for chain in attack_chains %}
+### {{ chain.name }} <span style="color: {{ chain.color }}">●</span>
+
+{% if chain.description %}{{ chain.description }}{% endif %}
+
+**Metadata**: Created {{ chain.created_at.strftime('%Y-%m-%d %H:%M') }} | Nodes: {{ chain.nodes|length }} | Branches: {{ chain.nodes|selectattr('is_branch_point')|list|length }}
+
+**Exploitation Path**:
+
+{% for node in chain.nodes|sort(attribute='sequence_order') -%}
+{{ loop.index }}. {{ resolve_entity(node.entity_type, node.entity_id|string) }}
+{% if node.method_notes %}   - **Method**: {{ node.method_notes }}
+{% endif -%}
+{% if node.is_branch_point %}
+> **Branch Point**: {{ node.branch_description }}
+
+{% endif -%}
+{% if not loop.last %} ↓
+
+{% endif -%}
+{% endfor %}
+
+![Attack Chain: {{ chain.name }}](./graphs/attack-chain-{{ chain.id }}.svg)
+
+**Figure**: Attack chain visualization showing exploitation path from {{ resolve_entity(chain.nodes|sort(attribute='sequence_order')|first|attr('entity_type'), chain.nodes|sort(attribute='sequence_order')|first|attr('entity_id')|string) }} to {{ resolve_entity(chain.nodes|sort(attribute='sequence_order')|last|attr('entity_type'), chain.nodes|sort(attribute='sequence_order')|last|attr('entity_id')|string) }}.
+
+---
+{% endfor %}
+{% endif %}
+
+## Detailed Host Information
+
+{% for host in hosts %}
+### Host: {{ host.ip_address }}{% if host.hostname %} ({{ host.hostname }}){% endif %}
+
+**Status**: {{ host.status }}
+**Operating System**: {{ host.os_family or 'Unknown' }}{% if host.os_details %} - {{ host.os_details }}{% endif %}
+{% if host.mac_address %}**MAC Address**: {{ host.mac_address }}  {% endif %}
+**First Seen**: {{ host.first_seen.strftime('%Y-%m-%d %H:%M:%S') if host.first_seen else 'N/A' }}
+**Last Seen**: {{ host.last_seen.strftime('%Y-%m-%d %H:%M:%S') if host.last_seen else 'N/A' }}
+
+{% if host.services %}
+<details>
+<summary><strong>Services ({{ host.services|length }})</strong></summary>
+
+| Port | Protocol | Service | Product | Version | Banner |
+|------|----------|---------|---------|---------|--------|
+{%- for service in host.services|sort(attribute='port') %}
+| {{ service.port }} | {{ service.protocol|upper }} | {{ service.service_name or 'unknown' }} | {{ service.product or '-' }} | {{ service.version or '-' }} | {% if service.banner %}`{{ service.banner|truncate(50) }}`{% else %}-{% endif %} |
+{%- endfor %}
+
+{% if host.services|selectattr('banner')|list %}
+#### Service Banners
+
+{% for service in host.services|selectattr('banner')|sort(attribute='port') %}
+**Port {{ service.port }}/{{ service.protocol|upper }}**:
+```
+{{ service.banner }}
+```
+{% endfor %}
+{% endif %}
+
+</details>
+{% else %}
+No services detected on this host.
+{% endif %}
+
+---
+{% endfor %}
+
+## Service Distribution
+
+### Top Services by Port
+
+| Port | Protocol | Count | Service Names |
+|------|----------|-------|---------------|
+{%- for port_info in stats.port_distribution[:20] %}
+| {{ port_info.port }} | {{ port_info.protocol|upper }} | {{ port_info.count }} | {{ port_info.services|join(', ')|truncate(50) }} |
+{%- endfor %}
+
+### Service Summary
+
+- **Total Unique Ports**: {{ stats.unique_ports }}
+- **Most Common Service**: {{ stats.most_common_service.name }} ({{ stats.most_common_service.count }} instances)
+- **TCP Services**: {{ stats.tcp_count }}
+- **UDP Services**: {{ stats.udp_count }}
+
+## Scan Metadata
+
+### Scan Information
+
+| Filename | Tool | Status | Processing Time | Parsed At |
+|----------|------|--------|-----------------|-----------|
+{%- for scan in scans %}
+| {{ scan.filename }} | {{ scan.tool_type }} | {{ scan.status }} | {{ scan.processing_time_ms or 0 }}ms | {{ scan.parsed_at.strftime('%Y-%m-%d %H:%M:%S') if scan.parsed_at else 'N/A' }} |
+{%- endfor %}
+
+### Processing Statistics
+
+- **Total Scans**: {{ scans|length }}
+- **Successful Scans**: {{ scans|selectattr('status', 'equalto', 'completed')|list|length }}
+- **Total Processing Time**: {{ stats.total_processing_time }}ms
+- **Average Processing Time**: {{ stats.avg_processing_time }}ms
+
+---
+
+*Report generated by Hermes Pentesting Documentation System*
+*Generated on {{ timestamp.strftime('%Y-%m-%d at %H:%M:%S UTC') }}*

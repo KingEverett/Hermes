@@ -1,0 +1,30 @@
+name: Internal Network Scan
+description: Fast internal network discovery and documentation workflow
+version: 1.0
+
+variables:
+  target: "{{target}}"
+  project: "{{project}}"
+  rate: "{{rate|default:50000}}"
+
+steps:
+  - name: fast-discovery
+    tool: masscan
+    args:
+      - "-p1-1024,3306,3389,5900,8080,8443"
+      - "{{target}}"
+      - "--rate"
+      - "{{rate}}"
+    timeout: 1800
+    on_error: fail
+
+  - name: detailed-scan
+    tool: nmap
+    depends_on:
+      - fast-discovery
+    args:
+      - "-sV"
+      - "-T4"
+      - "{{target}}"
+    timeout: 3600
+    on_error: continue

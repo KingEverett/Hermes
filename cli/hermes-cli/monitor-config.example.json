@@ -1,0 +1,30 @@
+{
+  "monitors": [
+    {
+      "directory": "~/scans/nmap",
+      "project": "my-pentest",
+      "patterns": ["*.xml"],
+      "recursive": false,
+      "delay": 5,
+      "max_concurrent": 3,
+      "exclude": ["*.tmp", "*.partial"]
+    },
+    {
+      "directory": "~/scans/masscan",
+      "project": "my-pentest",
+      "patterns": ["*.json"],
+      "recursive": false,
+      "delay": 3,
+      "max_concurrent": 3
+    },
+    {
+      "directory": "~/scans/web",
+      "project": "my-pentest",
+      "patterns": ["*.txt"],
+      "recursive": false,
+      "delay": 5,
+      "max_concurrent": 2,
+      "exclude": ["*.tmp", "*.log"]
+    }
+  ]
+}

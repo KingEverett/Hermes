@@ -1,0 +1,32 @@
+name: External Network Assessment
+description: Comprehensive external network assessment workflow
+version: 1.0
+
+variables:
+  target: "{{target}}"
+  project: "{{project}}"
+  rate: "{{rate|default:10000}}"
+
+steps:
+  - name: port-discovery
+    tool: masscan
+    args:
+      - "-p1-65535"
+      - "{{target}}"
+      - "--rate"
+      - "{{rate}}"
+    timeout: 3600
+    on_error: fail
+
+  - name: service-enumeration
+    tool: nmap
+    depends_on:
+      - port-discovery
+    args:
+      - "-sV"
+      - "-sC"
+      - "-p"
+      - "1-65535"
+      - "{{target}}"
+    timeout: 7200
+    on_error: fail

@@ -1,0 +1,47 @@
+Compiled with problems:
+×
+ERROR in src/test-utils/msw-server.ts:8:29
+TS2307: Cannot find module 'msw/node' or its corresponding type declarations.
+     6 |  */
+     7 |
+  >  8 | import { setupServer } from 'msw/node';
+       |                             ^^^^^^^^^^
+     9 | import { rest } from 'msw';
+    10 |
+    11 | // Default handlers for common API endpoints
+ERROR in src/test-utils/msw-server.ts:9:22
+TS2307: Cannot find module 'msw' or its corresponding type declarations.
+     7 |
+     8 | import { setupServer } from 'msw/node';
+  >  9 | import { rest } from 'msw';
+       |                      ^^^^^
+    10 |
+    11 | // Default handlers for common API endpoints
+    12 | export const handlers = [
+ERROR in src/test-utils/msw-server.ts:14:34
+TS7006: Parameter 'req' implicitly has an 'any' type.
+    12 | export const handlers = [
+    13 |   // GET /api/v1/projects/ - Returns empty array by default
+  > 14 |   rest.get('/api/v1/projects/', (req, res, ctx) => {
+       |                                  ^^^
+    15 |     return res(ctx.json([]));
+    16 |   }),
+    17 | ];
+ERROR in src/test-utils/msw-server.ts:14:39
+TS7006: Parameter 'res' implicitly has an 'any' type.
+    12 | export const handlers = [
+    13 |   // GET /api/v1/projects/ - Returns empty array by default
+  > 14 |   rest.get('/api/v1/projects/', (req, res, ctx) => {
+       |                                       ^^^
+    15 |     return res(ctx.json([]));
+    16 |   }),
+    17 | ];
+ERROR in src/test-utils/msw-server.ts:14:44
+TS7006: Parameter 'ctx' implicitly has an 'any' type.
+    12 | export const handlers = [
+    13 |   // GET /api/v1/projects/ - Returns empty array by default
+  > 14 |   rest.get('/api/v1/projects/', (req, res, ctx) => {
+       |                                            ^^^
+    15 |     return res(ctx.json([]));
+    16 |   }),
+    17 | ];

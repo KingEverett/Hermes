@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
 import { RightPanel } from '../RightPanel';
 
 describe('RightPanel', () => {
@@ -9,7 +10,7 @@ describe('RightPanel', () => {
       label: '192.168.1.1',
     };
 
-    render(<RightPanel selectedNode={mockNode} />);
+    render(<RightPanel selectedNode={mockNode} projectId="test-project-id" />);
 
     expect(screen.getByText('Node Details')).toBeInTheDocument();
     expect(screen.getByText('host_1')).toBeInTheDocument();
@@ -17,28 +18,28 @@ describe('RightPanel', () => {
   });
 
   test('renders ProjectSummary when no node is selected', () => {
-    render(<RightPanel selectedNode={null} />);
+    render(<RightPanel selectedNode={null} projectId="test-project-id" />);
 
     expect(screen.getByText('Project Overview')).toBeInTheDocument();
     expect(screen.getByText('Current Project')).toBeInTheDocument();
   });
 
   test('applies dark theme styling', () => {
-    const { container } = render(<RightPanel selectedNode={null} />);
+    const { container } = render(<RightPanel selectedNode={null} projectId="test-project-id" />);
 
     const panel = container.firstChild;
     expect(panel).toHaveClass('bg-gray-800', 'border-l', 'border-gray-700');
   });
 
   test('has proper height and overflow classes', () => {
-    const { container } = render(<RightPanel selectedNode={null} />);
+    const { container } = render(<RightPanel selectedNode={null} projectId="test-project-id" />);
 
     const panel = container.firstChild;
     expect(panel).toHaveClass('h-full', 'overflow-y-auto');
   });
 
   test('switches from ProjectSummary to NodeDetails when node selected', () => {
-    const { rerender } = render(<RightPanel selectedNode={null} />);
+    const { rerender } = render(<RightPanel selectedNode={null} projectId="test-project-id" />);
     expect(screen.getByText('Project Overview')).toBeInTheDocument();
 
     const mockNode = {
@@ -47,7 +48,7 @@ describe('RightPanel', () => {
       label: 'HTTP (80/tcp)',
     };
 
-    rerender(<RightPanel selectedNode={mockNode} />);
+    rerender(<RightPanel selectedNode={mockNode} projectId="test-project-id" />);
     expect(screen.getByText('Node Details')).toBeInTheDocument();
     expect(screen.queryByText('Project Overview')).not.toBeInTheDocument();
   });

@@ -1,0 +1,24 @@
+[Unit]
+Description=Hermes Monitor Daemon
+After=network.target
+
+[Service]
+Type=forking
+User=YOUR_USERNAME
+Group=YOUR_GROUP
+WorkingDirectory=/home/YOUR_USERNAME
+ExecStart=/usr/local/bin/hermes monitor start --config /home/YOUR_USERNAME/.hermes/monitor-config.json
+ExecStop=/usr/local/bin/hermes monitor stop
+PIDFile=/home/YOUR_USERNAME/.hermes/monitor.pid
+Restart=on-failure
+RestartSec=10s
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/YOUR_USERNAME/.hermes
+
+[Install]
+WantedBy=multi-user.target

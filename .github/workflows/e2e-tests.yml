@@ -1,0 +1,93 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/web-app/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start backend server
+        working-directory: ./backend
+        run: |
+          # Initialize database if needed
+          python -m alembic upgrade head || echo "No migrations to run"
+          # Start backend in background
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          # Wait for backend to be ready
+          timeout 60 bash -c 'until curl -s http://localhost:8000/api/v1/projects/ > /dev/null 2>&1; do sleep 2; done'
+        env:
+          DATABASE_URL: sqlite:///./test_hermes.db
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend/web-app
+        run: npm ci --legacy-peer-deps
+
+      - name: Build frontend
+        working-directory: ./frontend/web-app
+        run: npm run build
+
+      - name: Start frontend server
+        working-directory: ./frontend/web-app
+        run: |
+          npx serve -s build -l 3000 &
+          # Wait for frontend to be ready
+          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+
+      - name: Run E2E tests
+        working-directory: ./frontend/web-app
+        run: npm run e2e:headless
+        env:
+          CYPRESS_baseUrl: http://localhost:3000
+          CYPRESS_apiUrl: http://localhost:8000
+
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: frontend/web-app/cypress/screenshots
+          retention-days: 7
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: frontend/web-app/cypress/videos
+          retention-days: 7
+
+      - name: Upload Cypress test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-reports
+          path: frontend/web-app/cypress/results
+          retention-days: 30

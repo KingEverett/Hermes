@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
 import { NodeDetails } from '../NodeDetails';
 
 describe('NodeDetails', () => {
@@ -9,7 +10,7 @@ describe('NodeDetails', () => {
       label: '192.168.1.1',
     };
 
-    render(<NodeDetails node={mockNode} />);
+    render(<NodeDetails node={mockNode} projectId="test-project-id" />);
 
     expect(screen.getByText('Node Details')).toBeInTheDocument();
     expect(screen.getByText('host_1')).toBeInTheDocument();
@@ -23,7 +24,7 @@ describe('NodeDetails', () => {
       label: '192.168.1.1',
     };
 
-    render(<NodeDetails node={mockNode} />);
+    render(<NodeDetails node={mockNode} projectId="test-project-id" />);
 
     expect(screen.getByText('Host Information')).toBeInTheDocument();
     expect(screen.queryByText('Service Information')).not.toBeInTheDocument();
@@ -36,7 +37,7 @@ describe('NodeDetails', () => {
       label: 'HTTP (80/tcp)',
     };
 
-    render(<NodeDetails node={mockNode} />);
+    render(<NodeDetails node={mockNode} projectId="test-project-id" />);
 
     expect(screen.getByText('Service Information')).toBeInTheDocument();
     expect(screen.queryByText('Host Information')).not.toBeInTheDocument();
@@ -49,7 +50,7 @@ describe('NodeDetails', () => {
       label: '192.168.1.1',
     };
 
-    render(<NodeDetails node={mockNode} />);
+    render(<NodeDetails node={mockNode} projectId="test-project-id" />);
 
     expect(screen.getByText('Vulnerabilities')).toBeInTheDocument();
     expect(screen.getByText('Full details coming in Story 3.4')).toBeInTheDocument();
@@ -62,7 +63,7 @@ describe('NodeDetails', () => {
       label: '192.168.1.1',
     };
 
-    render(<NodeDetails node={mockNode} />);
+    render(<NodeDetails node={mockNode} projectId="test-project-id" />);
 
     const loadingTexts = screen.getAllByText('Loading...');
     expect(loadingTexts.length).toBeGreaterThan(0);
@@ -75,7 +76,7 @@ describe('NodeDetails', () => {
       label: '192.168.1.1',
     };
 
-    const { container } = render(<NodeDetails node={mockNode} />);
+    const { container } = render(<NodeDetails node={mockNode} projectId="test-project-id" />);
 
     // The type should be in a paragraph with capitalize class
     const typeElement = container.querySelector('.capitalize');

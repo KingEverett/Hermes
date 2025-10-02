@@ -1,0 +1,31 @@
+name: Web Application Enumeration
+description: Comprehensive web application enumeration workflow
+version: 1.0
+
+variables:
+  target: "{{target}}"
+  project: "{{project}}"
+  wordlist: "{{wordlist|default:/usr/share/wordlists/dirb/common.txt}}"
+
+steps:
+  - name: port-scan
+    tool: nmap
+    args:
+      - "-p80,443,8080,8443"
+      - "-sV"
+      - "{{target}}"
+    timeout: 600
+    on_error: fail
+
+  - name: directory-enum
+    tool: gobuster
+    depends_on:
+      - port-scan
+    args:
+      - "dir"
+      - "-u"
+      - "http://{{target}}"
+      - "-w"
+      - "{{wordlist}}"
+    timeout: 1800
+    on_error: continue

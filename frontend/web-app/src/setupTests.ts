@@ -1,5 +1,25 @@
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 import '@testing-library/jest-dom';
+import { server } from './test-utils/msw-server';
+
+// Establish API mocking before all tests
+beforeAll(() => {
+  server.listen({
+    onUnhandledRequest: 'warn', // Warn about unhandled requests
+  });
+});
+
+// Reset any request handlers that are added during tests
+afterEach(() => {
+  server.resetHandlers();
+  // Clear React Query cache between tests
+  jest.clearAllMocks();
+});
+
+// Clean up after all tests are done
+afterAll(() => {
+  server.close();
+});
 
 // Mock D3.js globally for all tests
 jest.mock('d3', () => {
