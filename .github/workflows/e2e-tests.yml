@@ -39,10 +39,18 @@ jobs:
         run: |
           # Initialize database if needed
           python -m alembic upgrade head || echo "No migrations to run"
+          # Ensure all tables are created (in case migrations are incomplete)
+          python init_db.py
+          # Verify database was created
+          ls -la test_hermes.db || echo "Database file not found"
           # Start backend in background
           uvicorn main:app --host 0.0.0.0 --port 8000 &
           # Wait for backend to be ready
-          timeout 60 bash -c 'until curl -s http://localhost:8000/api/v1/projects/ > /dev/null 2>&1; do sleep 2; done'
+          echo "Waiting for backend to start..."
+          timeout 60 bash -c 'until curl -s http://localhost:8000/health > /dev/null 2>&1; do echo "Waiting..."; sleep 2; done'
+          # Test the projects endpoint specifically
+          echo "Testing projects endpoint..."
+          curl -v http://localhost:8000/api/v1/projects/ || echo "Projects endpoint failed"
         env:
           DATABASE_URL: sqlite:///./test_hermes.db
 
