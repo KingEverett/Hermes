@@ -80,19 +80,21 @@ export const ProjectView: React.FC<ProjectViewProps> = ({ projectId }) => {
   }
 
   return (
-    <ThreePanelLayout
-      left={<LeftSidebar />}
-      center={
-        <div className="h-full relative">
-          <NetworkGraph
-            topology={data}
-            onNodeSelect={handleNodeSelect}
-            selectedNodeIds={selectedNode ? [selectedNode.id] : []}
-          />
-        </div>
-      }
-      right={<RightPanel selectedNode={selectedNode} projectId={projectId} />}
-    />
+    <div data-testid="project-view">
+      <ThreePanelLayout
+        left={<LeftSidebar />}
+        center={
+          <div className="h-full relative">
+            <NetworkGraph
+              topology={data}
+              onNodeSelect={handleNodeSelect}
+              selectedNodeIds={selectedNode ? [selectedNode.id] : []}
+            />
+          </div>
+        }
+        right={<RightPanel selectedNode={selectedNode} projectId={projectId} />}
+      />
+    </div>
   );
 };
 
