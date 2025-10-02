@@ -56,7 +56,7 @@ export const ProjectView: React.FC<ProjectViewProps> = ({ projectId }) => {
 
   if (isLoading) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-900">
+      <div data-testid="project-view" className="w-full h-full flex items-center justify-center bg-gray-900">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
           <p className="text-gray-100">Loading network topology...</p>
@@ -67,7 +67,7 @@ export const ProjectView: React.FC<ProjectViewProps> = ({ projectId }) => {
 
   if (error) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-900">
+      <div data-testid="project-view" className="w-full h-full flex items-center justify-center bg-gray-900">
         <div className="text-center max-w-md">
           <div className="text-red-500 text-5xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-100 mb-2">Failed to load topology</h2>
@@ -85,7 +85,7 @@ export const ProjectView: React.FC<ProjectViewProps> = ({ projectId }) => {
 
   if (!data) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-900">
+      <div data-testid="project-view" className="w-full h-full flex items-center justify-center bg-gray-900">
         <p className="text-gray-100">No topology data available</p>
       </div>
     );
