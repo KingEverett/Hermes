@@ -41,50 +41,67 @@ describe('Application Load & Project Display', () => {
   });
 
   it('should render network graph with topology data when project loads', () => {
+    // Mock the projects API to return test data
+    cy.fixture('test-project').then((project) => {
+      cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, [project]).as('getProjects');
+    });
+
+    // Mock the topology API to return test topology data
+    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology/`, {
+      nodes: [
+        { id: 'host_1', type: 'host', label: 'Web Server 1', group: 'hosts', x: 100, y: 100 }
+      ],
+      edges: []
+    }).as('getTopology');
+
     // Visit the application
     cy.visit('/');
+
+    // Wait for API calls
+    cy.wait('@getProjects');
+    cy.wait('@getTopology');
 
     // Wait for the loading state to disappear
     cy.contains('Loading Hermes...').should('not.exist', { timeout: 10000 });
 
-    // Verify the app has loaded past loading state
-    // The app should either show ProjectView or "No projects" state
-    cy.get('body').should('exist');
-
-    // If a project exists, verify ProjectView is rendered
-    cy.get('[data-testid="project-view"]', { timeout: 15000 })
-      .should('exist')
-      .then(($projectView) => {
-        // ProjectView found - verify it contains project data
-        expect($projectView).to.exist;
-      });
+    // Verify ProjectView is rendered
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
   });
 
   it('should display network graph with nodes when project has topology data', () => {
-    // Intercept projects API
-    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`).as('getProjects');
+    // Mock the projects API to return test data
+    cy.fixture('test-project').then((project) => {
+      cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/`, [project]).as('getProjects');
+    });
+
+    // Mock the topology API with nodes
+    cy.intercept('GET', `${Cypress.env('apiUrl')}/api/v1/projects/*/topology/`, {
+      nodes: [
+        { id: 'host_1', type: 'host', label: 'Web Server 1', group: 'hosts', x: 100, y: 100 },
+        { id: 'host_2', type: 'host', label: 'Database Server', group: 'hosts', x: 200, y: 150 }
+      ],
+      edges: [
+        { source: 'host_1', target: 'host_2', type: 'connects' }
+      ]
+    }).as('getTopology');
 
     // Visit the application
     cy.visit('/');
 
-    // Wait for projects to load
-    cy.wait('@getProjects', { timeout: 10000 });
+    // Wait for API calls
+    cy.wait('@getProjects');
+    cy.wait('@getTopology');
 
     // Wait for loading to complete
     cy.contains('Loading Hermes...').should('not.exist', { timeout: 10000 });
 
-    // Verify ProjectView is rendered (if project exists)
-    cy.get('[data-testid="project-view"]', { timeout: 15000 }).then(($projectView) => {
-      if ($projectView.length > 0) {
-        // ProjectView exists - look for NetworkGraph
-        cy.log('ProjectView found, checking for network graph');
+    // Verify ProjectView is rendered
+    cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
 
-        // The network graph should be present in the view
-        // Note: Actual graph structure depends on implementation
-        // This verifies the component hierarchy loaded successfully
-        cy.get('[data-testid="project-view"]').should('be.visible');
-      }
-    });
+    cy.log('ProjectView found, verifying network graph structure');
+
+    // The network graph should be present in the view
+    cy.get('[data-testid="project-view"]').should('be.visible');
   });
 
   it('should handle empty project state gracefully', () => {

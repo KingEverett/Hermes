@@ -22,7 +22,7 @@ describe('Error Handling & Retry', () => {
     cy.wait('@getProjectsError');
 
     // Verify error message appears
-    cy.contains('Failed to fetch projects', { timeout: 10000 }).should('be.visible');
+    cy.contains('Cannot connect to backend', { timeout: 10000 }).should('be.visible');
 
     cy.log('Error UI displayed successfully');
   });
@@ -74,7 +74,7 @@ describe('Error Handling & Retry', () => {
     cy.wait('@getProjects');
 
     // Verify error state
-    cy.contains('Failed to fetch projects', { timeout: 10000 }).should('be.visible');
+    cy.contains('Cannot connect to backend', { timeout: 10000 }).should('be.visible');
 
     // Click retry button
     cy.contains('button', /retry/i).click();
@@ -83,7 +83,7 @@ describe('Error Handling & Retry', () => {
     cy.wait('@getProjects');
 
     // Verify error message is gone
-    cy.contains('Failed to fetch projects').should('not.exist');
+    cy.contains('Cannot connect to backend').should('not.exist');
 
     // Verify app recovered (either shows ProjectView or no projects state)
     cy.get('body').should('exist');
@@ -124,7 +124,7 @@ describe('Error Handling & Retry', () => {
     cy.wait('@getProjects');
 
     // Verify error state
-    cy.contains('Failed to fetch projects').should('be.visible');
+    cy.contains('Cannot connect to backend').should('be.visible');
 
     // Click retry button
     cy.contains('button', /retry/i).click();
@@ -133,7 +133,7 @@ describe('Error Handling & Retry', () => {
     cy.wait('@getProjects');
 
     // Verify error is gone
-    cy.contains('Failed to fetch projects').should('not.exist');
+    cy.contains('Cannot connect to backend').should('not.exist');
 
     // Verify ProjectView is rendered
     cy.get('[data-testid="project-view"]', { timeout: 15000 }).should('exist');
@@ -157,7 +157,7 @@ describe('Error Handling & Retry', () => {
     cy.wait('@getProjectsTimeout');
 
     // Verify error UI appears
-    cy.contains('Failed to fetch projects', { timeout: 10000 }).should('be.visible');
+    cy.contains('Cannot connect to backend', { timeout: 10000 }).should('be.visible');
 
     // Verify retry button is available
     cy.contains('button', /retry/i).should('be.visible');
@@ -208,19 +208,19 @@ describe('Error Handling & Retry', () => {
 
     // Wait for first failed request
     cy.wait('@getProjects');
-    cy.contains('Failed to fetch projects').should('be.visible');
+    cy.contains('Cannot connect to backend').should('be.visible');
 
     // First retry - still fails
     cy.contains('button', /retry/i).click();
     cy.wait('@getProjects');
-    cy.contains('Failed to fetch projects').should('be.visible');
+    cy.contains('Cannot connect to backend').should('be.visible');
 
     // Second retry - succeeds
     cy.contains('button', /retry/i).click();
     cy.wait('@getProjects');
 
     // Error should be gone
-    cy.contains('Failed to fetch projects').should('not.exist');
+    cy.contains('Cannot connect to backend').should('not.exist');
 
     cy.log('Multiple retry attempts handled successfully');
   });
@@ -259,11 +259,11 @@ describe('Error Handling & Retry', () => {
     cy.log('Step 2: Initial request failed');
 
     // 3. Verify error UI displays
-    cy.contains('Failed to fetch projects', { timeout: 10000 }).should('be.visible');
+    cy.contains('Cannot connect to backend', { timeout: 10000 }).should('be.visible');
     cy.log('Step 3: Error UI displayed');
 
     // 4. Verify error message is shown
-    cy.get('body').should('contain', 'Failed to fetch projects');
+    cy.get('body').should('contain', 'Cannot connect to backend');
     cy.log('Step 4: Error message verified');
 
     // 5. Verify retry button is visible and clickable
@@ -279,7 +279,7 @@ describe('Error Handling & Retry', () => {
     cy.log('Step 7: Retry request succeeded');
 
     // 8. Verify error UI is gone
-    cy.contains('Failed to fetch projects').should('not.exist');
+    cy.contains('Cannot connect to backend').should('not.exist');
     cy.log('Step 8: Error UI cleared');
 
     // 9. Verify app recovered and shows ProjectView
