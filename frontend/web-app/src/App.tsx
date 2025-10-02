@@ -20,6 +20,15 @@ const queryClient = new QueryClient({
 export function AppContent() {
   const { project, hasProjects, isLoading, error, refetch } = useDefaultProject();
 
+  // Debug logging for E2E tests
+  console.log('🔍 AppContent Debug:', {
+    isLoading,
+    hasProjects,
+    projectId: project?.id,
+    projectName: project?.name,
+    error: error?.message
+  });
+
   // Loading state
   if (isLoading) {
     return (
